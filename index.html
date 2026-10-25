@@ -1,0 +1,178 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+// ==========================================
+// 1. CLASSE ARTICLE (PRODUIT)
+// ==========================================
+class Article {
+    private String nom;
+    private double prix;
+    private String categorie;
+
+    public Article(String nom, double prix, String categorie) {
+        this.nom = nom;
+        this.prix = prix;
+        this.categorie = categorie;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public double getPrix() {
+        return prix;
+    }
+
+    public String getCategorie() {
+        return categorie;
+    }
+
+    @Override
+    public String toString() {
+        return nom + " (" + categorie + ") - " + prix + " €";
+    }
+}
+
+// ==========================================
+// 2. CLASSE COMMANDE (PANIER)
+// ==========================================
+class Commande {
+    private List<Article> articles;
+
+    public Commande() {
+        this.articles = new ArrayList<>();
+    }
+
+    public void ajouterArticle(Article article) {
+        articles.add(article);
+        System.out.println("✅ [Panier] Ajouté : " + article.getNom());
+    }
+
+    public double calculerTotal() {
+        double total = 0;
+        for (Article a : articles) {
+            total += a.getPrix();
+        }
+        return total;
+    }
+
+    public void afficherTicket() {
+        System.out.println("\n--- 🧾 TICKET DE CAISSE - SNACK TIGO ---");
+        if (articles.isEmpty()) {
+            System.out.println("Votre panier est vide.");
+        } else {
+            for (int i = 0; i < articles.size(); i++) {
+                System.out.println((i + 1) + ". " + articles.get(i).getNom() + " : " + articles.get(i).getPrix() + " €");
+            }
+            System.out.println("----------------------------------------");
+            System.out.printf("TOTAL À PAYER : %.2f €\n", calculerTotal());
+        }
+        System.out.println("----------------------------------------\n");
+    }
+
+    public boolean estVide() {
+        return articles.isEmpty();
+    }
+}
+
+// ==========================================
+// 3. CLASSE PRINCIPALE (APPLICATION)
+// ==========================================
+public class SnackTigoApp {
+    public static void initialiserMenu(List<Article> menu) {
+        // Snacks & Burgers
+        menu.add(new Article("Burger Tigo Classic", 6.50, "Burger"));
+        menu.add(new Article("Burger Tigo Bacon", 7.50, "Burger"));
+        menu.add(new Article("Tacos 2 Viandes", 8.00, "Tacos"));
+        menu.add(new Article("Panini Fromage", 4.50, "Panini"));
+        
+        // Accompagnements
+        menu.add(new Article("Frites Maison", 3.00, "Accompagnement"));
+        menu.add(new Article("Nuggets (x6)", 4.00, "Accompagnement"));
+
+        // Boissons
+        menu.add(new Article("Coca-Cola 33cl", 2.00, "Boisson"));
+        menu.add(new Article("Oasis Tropical 33cl", 2.00, "Boisson"));
+        menu.add(new Article("Eau Minérale 50cl", 1.50, "Boisson"));
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.`in`);
+        List<Article> menu = new ArrayList<>();
+        initialiserMenu(menu);
+
+        Commande commandeClient = new Commande();
+        boolean enCours = true;
+
+        System.out.println("========================================");
+        System.out.println("    BIENVENUE AU SNACK TIGO 🍔🍟🥤    ");
+        System.out.println("========================================");
+
+        while (enCours) {
+            System.out.println("\n--- MENU PRINCIPAL ---");
+            System.out.println("1. Afficher le menu");
+            System.out.println("2. Ajouter un article au panier");
+            System.out.println("3. Voir mon panier / Ticket");
+            System.out.println("4. Valider et payer la commande");
+            System.out.println("0. Quitter");
+            System.out.print("Choisissez une option : ");
+
+            int choix = -1;
+            if (scanner.hasNextInt()) {
+                choix = scanner.nextInt();
+            } else {
+                System.out.println("❌ Entrée invalide. Veuillez entrer un chiffre.");
+                scanner.next(); // Nettoyer le buffer
+                continue;
+            }
+
+            switch (choix) {
+                case 1:
+                    System.out.println("\n--- NOTRE MENU ---");
+                    for (int i = 0; i < menu.size(); i++) {
+                        System.out.println((i + 1) + ". " + menu.get(i));
+                    }
+                    break;
+
+                case 2:
+                    System.out.println("\n--- CHOISIR UN ARTICLE ---");
+                    for (int i = 0; i < menu.size(); i++) {
+                        System.out.println((i + 1) + ". " + menu.get(i).getNom() + " (" + menu.get(i).getPrix() + " €)");
+                    }
+                    System.out.print("Entrez le numéro de l'article à ajouter : ");
+                    int indexArticle = scanner.nextInt() - 1;
+
+                    if (indexArticle >= 0 && indexArticle < menu.size()) {
+                        commandeClient.ajouterArticle(menu.get(indexArticle));
+                    } else {
+                        System.out.println("❌ Numéro d'article invalide !");
+                    }
+                    break;
+
+                case 3:
+                    commandeClient.afficherTicket();
+                    break;
+
+                case 4:
+                    if (commandeClient.estVide()) {
+                        System.out.println("⚠️ Votre panier est vide, impossible de commander.");
+                    } else {
+                        commandeClient.afficherTicket();
+                        System.out.println("🎉 Commande validée avec succès ! Merci d'avoir choisi le Snack Tigo.");
+                        enCours = false; // Fin du programme
+                    }
+                    break;
+
+                case 0:
+                    System.out.println("👋 Merci et à bientôt au Snack Tigo !");
+                    enCours = false;
+                    break;
+
+                default:
+                    System.out.println("❌ Option invalide, veuillez réessayer.");
+            }
+        }
+        scanner.close();
+    }
+}
